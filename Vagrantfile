@@ -3,6 +3,7 @@
 
 Vagrant.configure(2) do |config|
   config.vm.box = 'debian/jessie64'
+  config.vm.define 'pop-up-mesos'
 
   config.vm.provider 'virtualbox' do |v|
     v.cpus   = 2
