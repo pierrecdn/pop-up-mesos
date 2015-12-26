@@ -1,7 +1,9 @@
+#!/usr/bin/env bash
 # LXC configuration
+export DEBIAN_FRONTEND=noninteractive
 
 echo 'Installing LXC packages';
-apt-get -y install lxc bridge-utils redir ethtool;
+apt-get -qq install lxc bridge-utils redir ethtool;
 
 echo 'Writing LXC default configuration';
 cat << EOF > /etc/lxc/default.conf
@@ -35,7 +37,7 @@ iface virbr0 inet static
 EOF
 
 echo 'Set up DHCP for containers';
-apt-get install -y dnsmasq
+apt-get install -qq dnsmasq
 cat << EOF > /etc/dnsmasq.conf
 interface=lxcbr0
 dhcp-range=10.0.4.100,10.0.4.200,255.255.255.0,12h
