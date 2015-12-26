@@ -13,6 +13,11 @@ Vagrant.configure(2) do |config|
     v.customize ['modifyvm', :id, '--natdnshostresolver1', 'on']
   end
 
+  # workaround for "stdin: is not a tty"
+  config.vm.provision 'fix-no-tty', type: 'shell', privileged: false do |s|
+    s.inline = "sudo sed -i '/tty/!s/mesg n/tty -s \\&\\& mesg n/' /root/.profile"
+  end
+
   config.vm.provision 'lxc', type: 'shell', path: 'scripts/lxc.sh', privileged: true
   config.vm.provision 'pkg', type: 'shell', path: 'scripts/pkg.sh', privileged: false
   config.vm.provision 'cup', type: 'shell', path: 'scripts/cup.sh', privileged: false
