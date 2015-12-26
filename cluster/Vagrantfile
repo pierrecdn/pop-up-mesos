@@ -9,16 +9,20 @@ end
 #
 # NODE CONFIGURATION
 #
-nodes =
-  [{
-    name:      'master01',
-    ipaddress: '172.18.1.10',
-    run_list:  ['recipe[mesos::master]']
-  }, {
-    name:      'slave01',
-    ipaddress: '172.18.2.10',
-    run_list:  ['recipe[mesos::slave]']
-  }]
+# Helper function to populate nodes
+def pop(name, run_list, ip, count)
+  ip = ip.rpartition('.')
+  nodes = []
+  1.upto(count) do |n|
+    nodes.push(name: "#{name}#{format('%02d', n)}",
+               ip:   "#{ip[0]}.#{ip[-1].to_i + n}",
+               run_list: run_list)
+  end
+  nodes
+end
+# Populate nodes
+nodes = pop('master', ['[mesos::master]'], '172.18.1.10', 1) +
+        pop('slave', ['[mesos::slave]'], '172.18.1.10', 1)
 #
 # VAGRANT CONFIGURATION
 #
@@ -31,7 +35,7 @@ Vagrant.configure(2) do |config|
       # Set up hostname
       v.vm.hostname = node[:name]
       # Connnect to private network
-      v.vm.network 'private_network', ip: node[:ipaddress], netmask: '255.255.0.0', lxc__bridge_name: 'virbr0'
+      v.vm.network 'private_network', ip: node[:ip], netmask: '255.255.0.0', lxc__bridge_name: 'virbr0'
       # Provision with Chef
       v.vm.provision :chef_zero do |chef|
         chef.nodes_path = ''
