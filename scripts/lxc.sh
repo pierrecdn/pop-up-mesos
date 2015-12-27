@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
+#
 # LXC configuration
+#
 export DEBIAN_FRONTEND=noninteractive
 
 echo 'Installing LXC packages';
