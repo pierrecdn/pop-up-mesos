@@ -21,8 +21,20 @@ def pop(name, run_list, ip, count)
   nodes
 end
 # Populate nodes
-nodes = pop('master', ['[mesos::master]'], '172.18.1.10', 1) +
-        pop('slave', ['[mesos::slave]'], '172.18.1.10', 1)
+masters = pop('master', ['recipe[mesos::master]'], '172.18.1.10', 1)
+slaves  = pop('slave',  ['recipe[mesos::slave]'],  '172.18.2.10', 1)
+# Simulate Chef::Search
+masters.map do |n|
+  n[:attributes] = { mesos: { master: { flags: { ip: n[:ip] } } } }
+end
+slaves.map do |n|
+  n[:attributes] = { mesos: { slave: { flags: {
+    ip: n[:ip],
+    master: masters.map { |m| "#{m[:ip]}:5050" }.join(',')
+  } } } }
+end
+# Sum up all nodes
+nodes = masters + slaves
 #
 # VAGRANT CONFIGURATION
 #
@@ -40,6 +52,7 @@ Vagrant.configure(2) do |config|
       v.vm.provision :chef_zero do |chef|
         chef.nodes_path = ''
         chef.run_list   = node[:run_list]
+        chef.json       = node[:attributes]
       end
     end
   end
