@@ -22,6 +22,7 @@ done
 # Install Vagrant box
 #
 echo 'Installing Vagrant box';
+# source: https://atlas.hashicorp.com/fgrehm/boxes/centos-6-64-lxc/versions/1.0.0/providers/lxc.box
 if ! vagrant box add '/vagrant/pkgs/lxc.box' --name 'fgrehm/centos-6-64-lxc'; then
   vagrant box add fgrehm/centos-6-64-lxc
 fi
