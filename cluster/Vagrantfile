@@ -30,7 +30,8 @@ end
 slaves.map do |n|
   n[:attributes] = { mesos: { slave: { flags: {
     ip: n[:ip],
-    master: masters.map { |m| "#{m[:ip]}:5050" }.join(',')
+    master: masters.map { |m| "#{m[:ip]}:5050" }.join(','),
+    launcher: 'posix',
   } } } }
 end
 # Sum up all nodes
