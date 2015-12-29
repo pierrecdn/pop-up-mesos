@@ -10,18 +10,19 @@ end
 # NODE CONFIGURATION
 #
 # Helper function to populate nodes
-def pop(name, run_list, ip, count)
+def pop(name, run_list, ip, count, fw_port = nil)
   ip = ip.rpartition('.')
   nodes = []
   1.upto(count) do |n|
     nodes.push(name: "#{name}#{format('%02d', n)}",
                ip:   "#{ip[0]}.#{ip[-1].to_i + n}",
-               run_list: run_list)
+               run_list: run_list,
+               fw_port: fw_port)
   end
   nodes
 end
 # Populate nodes
-masters = pop('master', ['recipe[mesos::master]'], '172.18.1.10', 1)
+masters = pop('master', ['recipe[mesos::master]'], '172.18.1.10', 1, 5050)
 slaves  = pop('slave',  ['recipe[mesos::slave]'],  '172.18.2.10', 1)
 # Simulate Chef::Search
 masters.map do |n|
@@ -48,6 +49,7 @@ Vagrant.configure(2) do |config|
       v.vm.hostname = node[:name]
       # Connnect to private network
       v.vm.network 'private_network', ip: node[:ip], netmask: '255.255.0.0', lxc__bridge_name: 'virbr0'
+      v.vm.network 'forwarded_port', guest: node[:fw_port], host: node[:fw_port], protocol: 'tcp', guest_ip: node[:ip], host_ip: '0.0.0.0' unless node[:fw_port].nil?
       # Provision with Chef
       v.vm.provision :chef_zero do |chef|
         chef.nodes_path = ''
